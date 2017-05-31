@@ -3,7 +3,7 @@ config = {
     Magnification: 1.0
     BatteryAlertLevel: 20
     CPUAlertLevel: 90
-    Opacity: 0.5
+    Opacity: 1
     Voice: false
     colourIdle: "rgba(10,10,10,1)"
     colourWarn: "rgba(256,0,0,1)"
@@ -320,11 +320,13 @@ style: """
         background-color: rgba(256,256,256,0.5);
         display:inline-block;
     .app
-        width: 100%;
-        heigth: 100%;
+        width: 90%;
+        heigth: 90%;
         position: relative;
         transform:rotate(270deg);
-        margin: -50px auto;
+        text-align: center;
+        display: block;
+        margin: -15px auto;
 """
 
 render: -> """
@@ -345,7 +347,7 @@ render: -> """
         </div>
         <div class="nav a2 CoverCell" target="_blank" href="#" id="44"><s></s><b1></b1></div>
         <div class="nav a2 CoverCell" target="_blank" href="#" id="45"><s1></s1><b></b></div>
-        <div class="nav a4" target="_blank" href="#" id="46"><s></s><b></b>
+        <div class="nav a2" target="_blank" href="#" id="46"><s></s><b></b>
             <img class="app" app="Xcode"></img>
         </div>
         <div class="nav a0" target="_blank" href="#" id="47"><s></s><b></b>
@@ -355,10 +357,9 @@ render: -> """
         <p></p>
 
         <div class="nav a1 CoverCell" target="_blank" href="#" id="48"><s></s><b2></b2></div>
-        <div class="nav a0" target="_blank" href="#" id="49"><s></s><b></b>
-            <div class="id">49</div>
-            <o></o><o style="transform:rotate(-60deg)"></o><o style="transform:rotate(-120deg)"></o>
-            <div class="Wcontent" style="text-decoration:underline overline"><u></u><d></d>WARNUNG</div></div>
+        <div class="nav a2" target="_blank" href="#" id="49"><s></s><b></b>
+              <img class="app" app="Spotify"></img>
+        </div>
         <div class="nav a0" target="_blank" href="#" id="50"><s></s><b></b>
             <div class="id">50</div>
             <o></o><o style="transform:rotate(-60deg)"></o><o style="transform:rotate(-120deg)"></o>
@@ -789,19 +790,19 @@ afterRender: (domEl) ->
       appContents = appDir + '/Contents'
       elem.onclick = -> run('open ' + shellQuote(appDir))
 
-      run('./Eva.widget/plist.sh ' + shellQuote(appName), (error, plistContent) ->
+      handler = (error, plistContent) ->
+          appContents = this.appContents
+          element = this.element
           plistContent = plist.parse(plistContent)
           iconFile = appContents + '/Resources/' + plistContent['CFBundleIconFile']
           run('base64 ' + shellQuote(iconFile), (error, icon) ->
             console.log(error)
             if !error
-              elem.setAttribute('src', 'data:image/png;base64,' + icon)
+              element.setAttribute('src', 'data:image/png;base64,' + icon)
             else
-              run('base64 ' + shellQuote(iconFile + '.icns'), (error, icon) ->
-                elem.setAttribute('src', 'data:image/png;base64,' + icon)
-                )
+              run('base64 ' + shellQuote(iconFile + '.icns'), (error, icon) -> element.setAttribute('src', 'data:image/png;base64,' + icon))
           )
-        )
+      run('./Eva.widget/plist.sh ' + shellQuote(appName), handler.bind({appContents: appContents, element: elem}))
 
 update: (output, domEl) ->
 #   functions
