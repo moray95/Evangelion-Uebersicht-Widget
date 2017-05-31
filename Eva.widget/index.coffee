@@ -789,7 +789,7 @@ afterRender: (domEl) ->
       appContents = appDir + '/Contents'
       elem.onclick = -> run('open ' + shellQuote(appDir))
 
-      run('./Eva.widget/icon.sh ' + shellQuote(appName), (error, plistContent) ->
+      run('./Eva.widget/plist.sh ' + shellQuote(appName), (error, plistContent) ->
           plistContent = plist.parse(plistContent)
           iconFile = appContents + '/Resources/' + plistContent['CFBundleIconFile']
           run('base64 ' + shellQuote(iconFile), (error, icon) ->
