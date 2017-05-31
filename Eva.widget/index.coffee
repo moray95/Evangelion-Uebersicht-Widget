@@ -319,7 +319,12 @@ style: """
         margin-left:1em;margin-right:1em;
         background-color: rgba(256,256,256,0.5);
         display:inline-block;
-
+    .app
+        width: 100%;
+        heigth: 100%;
+        position: relative;
+        transform:rotate(270deg);
+        margin: -50px auto;
 """
 
 render: -> """
@@ -340,10 +345,9 @@ render: -> """
         </div>
         <div class="nav a2 CoverCell" target="_blank" href="#" id="44"><s></s><b1></b1></div>
         <div class="nav a2 CoverCell" target="_blank" href="#" id="45"><s1></s1><b></b></div>
-        <div class="nav a0" target="_blank" href="#" id="46"><s></s><b></b>
-            <div class="id">46</div>
-            <o></o><o style="transform:rotate(-60deg)"></o><o style="transform:rotate(-120deg)"></o>
-            <div class="Wcontent" style="text-decoration:underline overline"><u></u><d></d>WARNUNG</div></div>
+        <div class="nav a4" target="_blank" href="#" id="46"><s></s><b></b>
+            <img class="app" app="Xcode"></img>
+        </div>
         <div class="nav a0" target="_blank" href="#" id="47"><s></s><b></b>
             <div class="id">47</div>
             <o></o><o style="transform:rotate(-60deg)"></o><o style="transform:rotate(-120deg)"></o>
@@ -757,10 +761,10 @@ afterRender: (domEl) ->
     window.Mwarning=0
     window.cellColour=-1
     window.count = -1
-    $(domEl).on 'click', '.iTunesPre', => @run "osascript -e 'tell application \"iTunes\" to previous track'"
-    $(domEl).on 'click', '.iTunesNext', => @run "osascript -e 'tell application \"iTunes\" to next track'"
-    $(domEl).on 'click', '.iTunesPause', => @run "osascript -e 'tell application \"iTunes\" to pause'"
-    $(domEl).on 'click', '.iTunesPlay', => @run "osascript -e 'tell application \"iTunes\" to play'"
+    $(domEl).on 'click', '.iTunesPre', => @run "osascript -e 'tell application \"Spotify\" to previous track'"
+    $(domEl).on 'click', '.iTunesNext', => @run "osascript -e 'tell application \"Spotify\" to next track'"
+    $(domEl).on 'click', '.iTunesPause', => @run "osascript -e 'tell application \"Spotify\" to playpause'"
+    $(domEl).on 'click', '.iTunesPlay', => @run "osascript -e 'tell application \"Spotify\" to playpause'"
     $(domEl).on 'click', '#TrashCell', => @run "osascript -e 'tell application \"Finder\" to empty'"
 #   Command to open up mounted volumes
     $(domEl).on 'click', '#66', => @run "ls /Volumes/ | awk -F'\t' '{ print $0}' > tmp.txt;i=1; cat tmp.txt | sed -e 's/[ ]/\\ /g ' | while read line; do if [ \"$i\" -eq 1 ]; then open /Volumes/\"${line}\"; fi; let i=i+1; done; rm tmp.txt
@@ -774,6 +778,30 @@ afterRender: (domEl) ->
     $(domEl).on 'click', '#65', => @run "ls /Volumes/ | awk -F'\t' '{ print $0}' > tmp.txt;i=1; cat tmp.txt | sed -e 's/[ ]/\\ /g ' | while read line; do if [ \"$i\" -eq 5 ]; then open /Volumes/\"${line}\"; fi; let i=i+1; done; rm tmp.txt
 "
     @run "rm Eva.widget/netstat.ipworking"
+
+    shellQuote = (str) -> '\'' + str + '\''
+    plist = require('plist')
+
+    run = @run
+    for elem in $('.app')
+      appName = elem.getAttribute('app')
+      appDir = '/Applications/' + appName + '.app'
+      appContents = appDir + '/Contents'
+      elem.onclick = -> run('open ' + shellQuote(appDir))
+
+      run('./Eva.widget/icon.sh ' + shellQuote(appName), (error, plistContent) ->
+          plistContent = plist.parse(plistContent)
+          iconFile = appContents + '/Resources/' + plistContent['CFBundleIconFile']
+          run('base64 ' + shellQuote(iconFile), (error, icon) ->
+            console.log(error)
+            if !error
+              elem.setAttribute('src', 'data:image/png;base64,' + icon)
+            else
+              run('base64 ' + shellQuote(iconFile + '.icns'), (error, icon) ->
+                elem.setAttribute('src', 'data:image/png;base64,' + icon)
+                )
+          )
+        )
 
 update: (output, domEl) ->
 #   functions
@@ -1132,3 +1160,5 @@ update: (output, domEl) ->
     )
     # Outputting all the information for debug
     $(domEl).find('.OP').text("#{output}")
+
+

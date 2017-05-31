@@ -1,0 +1,9 @@
+{
+  "name": "Eva.widget",
+  "version": "1.0.0",
+  "main": "index.coffee",
+  "license": "MIT",
+  "dependencies": {
+    "plist": "^2.1.0"
+  }
+}
